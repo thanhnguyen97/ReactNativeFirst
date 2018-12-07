@@ -19,7 +19,8 @@ export default class VerticalScrollView extends Component {
                         onScroll={(event)=> {
                             let LogData = ` Scrolled to x = ${event.nativeEvent.contentOffset.x}, y = ${event.nativeEvent.contentOffset.y} `
                             console.log(LogData);
-                        }}>
+                        }}
+                        scrollEventThrottle={10}>
                 <View style={{
                     backgroundColor: '#5f9ea0',
                     flex: 1,
