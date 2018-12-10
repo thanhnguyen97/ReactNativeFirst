@@ -3,6 +3,7 @@ import { View, Text, FlatList, Image, StyleSheet, Alert, Platform, TouchableHigh
 import flatListData from '../data/FlatListData';
 import Swipeout from 'react-native-swipeout';
 import AddModal from './AddModal';
+import EditModal from './EditModal';
 // import Swiper from 'react-native-swiper';
 
 class FlatListItem extends Component {
@@ -11,6 +12,14 @@ class FlatListItem extends Component {
         this.state = {
             activeRowKey: null
         };
+    }
+    refreshFlatListItem = () => {
+        this.setState((prevState) => {
+                return {
+                    numberOfRefresh: prevState.numberOfRefresh + 1
+                };
+            } 
+        );
     }
     render() {
         const swipeSettings = {
@@ -24,6 +33,14 @@ class FlatListItem extends Component {
                 this.setState({ activeRowKey: this.props.item.key});
             },
             right: [
+                {
+                    onPress: () => {
+                        // alert("update");
+                        this.props.parentFlatList.refs.editModal.showEditModal(flatListData[this.props.index], this)
+                    },
+                    text: 'Edit' , type: 'primary'
+                },
+
                 {
                     onPress: () => {
                         const deletingRow = this.state.activeRowKey;   
@@ -65,7 +82,7 @@ class FlatListItem extends Component {
                             flex: 1,
                             flexDirection: 'column'}}>
                             <Text style={styles.flatListItem}>{this.props.item.name}</Text>
-                            <Text style={styles.flatListItem}>{this.props.item.foodDescription}</Text>
+                            <Text style={styles.flatListItem}>{this.props.item.girlDescription}</Text>
                         </View>
                     </View>
                     <View style={{ 
@@ -122,27 +139,29 @@ export default class BasicFlatList extends Component {
                     marginRight: 10
                 }}
                 underlayColor='tomato'
-                onPress= {this._onPressAdd}
-                >
-                <Image style={{width: 35, height: 35}}
-                        source={require('../images/icon_add.png')}
-                />
+                onPress= {this._onPressAdd}>
+                    <Image style={{width: 35, height: 35}}
+                            source={require('../images/icon_add.png')}
+                    />
                 </TouchableHighlight>
 
                 </View>
-                <FlatList 
-                    ref={"flatList"}
-                    data={flatListData}
-                    renderItem={({item, index})=>{
-                        // console.log(`Item=${JSON.stringify(item)}, index=${index}`);
-                        return(
-                            <FlatListItem item={item} index={index} parentFlatList={this}>
-                            </FlatListItem>);
-                    }}>
-                </FlatList>
-                <AddModal ref ={'addModal'} parentFlatList={this}>
-                
-                </AddModal>
+                    <FlatList 
+                        ref={"flatList"}
+                        data={flatListData}
+                        renderItem={({item, index})=>{
+                            // console.log(`Item=${JSON.stringify(item)}, index=${index}`);
+                            return(
+                                <FlatListItem item={item} index={index} parentFlatList={this}>
+                                </FlatListItem>);
+                        }}>
+                    </FlatList>
+                    <AddModal ref ={'addModal'} parentFlatList={this}>
+                    
+                    </AddModal>
+                    <EditModal ref={'editModal'} parentFlatList={this}>
+
+                    </EditModal>
             </View>
         );
     }
