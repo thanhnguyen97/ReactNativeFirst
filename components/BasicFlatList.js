@@ -1,17 +1,38 @@
 import React, { Component } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, Alert, Platform, TouchableHighlight } from 'react-native';
+import { RefreshControl, View, Text, FlatList, Image, StyleSheet, Alert, Platform, TouchableHighlight } from 'react-native';
 import flatListData from '../data/FlatListData';
 import Swipeout from 'react-native-swipeout';
 import AddModal from './AddModal';
 import EditModal from './EditModal';
 // import Swiper from 'react-native-swiper';
 
+import { getFoodsFromServer } from '../networking/Server';
+
 class FlatListItem extends Component {
     constructor(props){
         super(props);
         this.state = {
-            activeRowKey: null
+            activeRowKey: null,
+            refreshing: false,
+            foodsFromServer: [], 
+            item: {}
         };
+    }
+    componentDidMount() {
+        this.refreshDataFromServer();
+    }
+    refreshDataFromServer = () => {
+        this.setState({ refreshing: true });
+        getFoodsFromServer().then((foods) => {
+            this.setState({ foodsFromServer: foods });
+            this.setState({ refreshing: false });
+        }).catch((error) => {
+            this.setState({ foodsFromServer: [] });
+            this.setState({ refreshing: false });
+        });
+    }
+    onRefresh = () => {
+        this.refreshDataFromServer();
     }
     refreshFlatListItem = () => {
         this.setState((prevState) => {
@@ -36,7 +57,9 @@ class FlatListItem extends Component {
                 {
                     onPress: () => {
                         // alert("update");
-                        this.props.parentFlatList.refs.editModal.showEditModal(flatListData[this.props.index], this)
+                        // this.props.parentFlatList.refs.editModal.showEditModal(flatListData[this.props.index], this)
+                        let selectedItem = this.state.item.name ? this.state.item : this.props.item;
+                        this.props.parentFlatList.refs.editModal.showEditModal(selectedItem, this);
                     },
                     text: 'Edit' , type: 'primary'
                 },
@@ -74,7 +97,7 @@ class FlatListItem extends Component {
                         backgroundColor: 'mediumseagreen'
                     }}>
                         <Image
-                            source={{uri: this.props.item.imageUrl}}
+                            source={{uri: 'https://' + this.props.item.imageUrl}}
                             style={{width: 100, height: 100, margin: 5}}
                         >
                         </Image>
@@ -148,13 +171,23 @@ export default class BasicFlatList extends Component {
                 </View>
                     <FlatList 
                         ref={"flatList"}
-                        data={flatListData}
+                        // data={flatListData}
+                        data ={this.state.foodsFromServer}
                         renderItem={({item, index})=>{
                             // console.log(`Item=${JSON.stringify(item)}, index=${index}`);
                             return(
                                 <FlatListItem item={item} index={index} parentFlatList={this}>
                                 </FlatListItem>);
-                        }}>
+                        }}
+                        keyExtractor= {(item, index) => item.name}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={ this.state.refreshing}
+                                onRefresh={this.onRefresh}
+                            ></RefreshControl>
+                            
+                        }
+                        >
                     </FlatList>
                     <AddModal ref ={'addModal'} parentFlatList={this}>
                     

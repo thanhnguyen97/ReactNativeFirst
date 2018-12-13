@@ -14,7 +14,7 @@ export default class EditModal extends Component {
         };
     }
     showEditModal = (editingGirl, flatListItem) => {
-        console.log(`editingFood= ${JSON.stringify(editingGirl)}`)
+        // console.log(`editingFood= ${JSON.stringify(editingGirl)}`)
         this.setState({
             key: editingGirl.key,
             girlName: editingGirl.name,
